@@ -1,5 +1,7 @@
-import { Value } from '../game';
-import { _Client } from './client';
+import { Value } from '../game'
+import { fromEvent, Observable } from 'rxjs'
+import { filter, takeUntil, map } from 'rxjs/operators'
+import { Key } from 'readline'
 const readline = require('readline')
 
 const score: Record<string, Value> = {
@@ -15,16 +17,18 @@ const score: Record<string, Value> = {
     g: 40,
     z: 100,
 }
+readline.emitKeypressEvents(process.stdin)
+process.stdin.setRawMode(true)
 
-export const listenForVotes = (client: _Client) => {    
-    readline.emitKeypressEvents(process.stdin)
-    process.stdin.setRawMode(true)
-    process.stdin.on('keypress', (_, key) => {
-        key.name in score && client.emitVote(score[key.name])                         
-            
-        // CTRL+C
-        if (key.name === 'c' && key.ctrl) {
-            throw Error('Quit.')
-        }
-    })        
-}
+const keyboardEvent$: Observable<Key> = fromEvent(process.stdin, 'keypress').pipe(
+    map((e: [string, Key]) => e[1]))
+
+const ctrlC$: Observable<Key> = keyboardEvent$.pipe(
+    filter((k: Key) => k.name === 'c' && k.ctrl))
+
+const input$ = keyboardEvent$.pipe(    
+    filter((k: Key) => k.name in score),
+    takeUntil(ctrlC$))
+
+export const vote$ =
+    input$.pipe(map((k: Key) => score[k.name]))

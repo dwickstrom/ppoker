@@ -5,11 +5,11 @@ import { last, prop } from "ramda";
 import { latestFrom, UUID, toList, toLast, die } from "../utils";
 import { Socket } from "socket.io";
 import { Value, _Game, _Vote, Vote, _GameState, GameStateLabel } from "../game";
-import { listenForVotes } from "./input";
 const io = require('socket.io-client')
 import * as Vorpal from 'vorpal'
 import { gamePage } from "./template";
 import { _Player, GameParticipant, PlayerId } from "../player";
+import { vote$ } from "./input";
 
 
 /*
@@ -138,7 +138,9 @@ const Client = (gameId: UUID, playerName: string): _Client => {
     getSocket: () => _socket,
   }
   
-  listenForVotes(client)
+  vote$.subscribe( client.emitVote
+                 , (err: any) => { console.log('Error:', err) }
+                 , () => { process.exit() })
 
   return client
 }
