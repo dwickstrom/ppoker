@@ -1,7 +1,7 @@
-import { AppState, App } from './app'
-import { latestFrom, now } from './utils';
-import { Player, PlayerId } from './player';
-import { Game, _Game, leaveGames, removeStale, _Vote, addVote } from './game';
+import { AppState } from './app'
+import { lastFrom, now } from './utils';
+import { PlayerId } from './player';
+import { _Game, leaveGames, removeStale, _Vote, addVote } from './game';
 import { Socket } from 'socket.io';
 
 export type EventLabel =
@@ -32,11 +32,11 @@ export const appendTo =
 
 export const removeById =
   (id: string | number | symbol) =>
-    (collection: Record<string | number | symbol, any>) =>
-      Object.keys(collection).reduce((acc, x) =>
+    (obj: Record<string | number | symbol, any>) =>
+      Object.keys(obj).reduce((acc, x) =>
         x === id ? acc : ({
           ...acc,
-          [x]: collection[x]
+          [x]: obj[x]
         }), {})
 
 const addPlayer = 
@@ -63,8 +63,8 @@ type AppStateReducer = ((e: _Event, socket: Socket) => (s: AppState[]) => AppSta
 export const clientDisconnected: AppStateReducer =
   (event: _Event, _: Socket) =>
     buffer =>
-      latestFrom(buffer)
-        .map(latest => ({
+      lastFrom(buffer)
+        .map((latest: AppState) => ({
           ...latest,
           connections: removeById(event.payload.connection.id)(latest.connections),
           games: leaveGames(event.payload.connection.id)(latest.games),
@@ -74,8 +74,8 @@ export const clientDisconnected: AppStateReducer =
 export const playerJoinedGame: AppStateReducer =
   (event: _Event, socket: Socket) =>
     buffer =>
-      latestFrom(buffer)
-        .map(latest => {
+      lastFrom(buffer)
+        .map((latest: AppState) => {
           if (Object.keys(latest.games).includes(event.payload.gameId)) {
             return ({
               ...latest,
@@ -94,8 +94,8 @@ export const playerJoinedGame: AppStateReducer =
 export const timeElapsed: AppStateReducer =
   _ =>
     buffer =>
-      latestFrom(buffer)
-        .map(latest => ({
+      lastFrom(buffer)
+        .map((latest: AppState) => ({
           ...latest,
           games: removeStale(latest.games)
         }))
@@ -104,8 +104,8 @@ export const timeElapsed: AppStateReducer =
 export const playerVoted: AppStateReducer =
   (event: _Event, socket: Socket) =>
     buffer =>
-      latestFrom(buffer)
-        .map(latest =>      
+      lastFrom(buffer)
+        .map((latest: AppState) =>      
            ({
             ...latest,
             games: Object.keys(latest.games)
@@ -117,50 +117,16 @@ export const playerVoted: AppStateReducer =
           }))
         .flatMap(appendTo(buffer))
 
-export const theUnknown: AppStateReducer =
-  _ => buffer => buffer
-
 export const clientConnected: AppStateReducer =
   (event: _Event, socket: Socket) =>
     buffer =>
-      latestFrom(buffer)
-        .map(latest => ({
+      lastFrom(buffer)
+        .map((latest: AppState) => ({
           ...latest,
           connections: {
             ...latest.connections,
             [event.payload.connection.id]: event.payload.connection.id}}))
         .flatMap(appendTo(buffer))
 
-// export const playerRegistered: AppStateReducer =
-//   (event: _Event, socket: Socket) =>
-//     buffer =>
-//       latestFrom(buffer)
-//         .map(latest => {
-//           return ({
-//             ...latest,
-//             players: {
-//               ...latest.players,
-//               [event.payload.connectionId]: Player(event.payload.name, event.payload.connectionId)
-//             }
-//           })
-//         })
-//         .flatMap(appendTo(buffer))
-
-// // The player will auto-join the game he/she creates. Not used
-// export const playerStartedGame: AppStateReducer =
-//   (event: _Event, socket: Socket) =>
-//     buffer =>
-//       latestFrom(buffer)
-//         .map(latest => ({
-//           latest, 
-//           newGame: Game(event.payload.description, {
-//             [event.payload.connectionId]: {joinedAt: new Date(), leftAt: null, name: 'server-man', playerId: event.payload.playerId}})
-//         }))
-//         .map(({latest, newGame}) => ({
-//           ...latest,
-//           games: {
-//             ...latest.games,
-//             [newGame.id]: addPlayer(event.payload.connectionId, event.payload.name)(newGame)
-//           }
-//         }))
-//         .flatMap(appendTo(buffer))
+export const theUnknown: AppStateReducer =
+  _ => buffer => buffer

@@ -7,7 +7,7 @@ export const die =
       process.exit()
     }
 
-export const latestFrom = <T>(list: T[]): T[] =>
+export const lastFrom = <T>(list: T[]): T[] =>
   list.length > 0
     ? [list[list.length-1]]
     : []
@@ -33,6 +33,9 @@ export const fst =
 export const snd =
   <_, U>(pair: [_, U]): U =>
     pair[1]
+
+export const raise = 
+  (err: any): never => { throw err }
 
 export const avg = 
   (ns: number[]) =>

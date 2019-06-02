@@ -1,8 +1,7 @@
 import { Value } from '../game'
-import { fromEvent, Observable } from 'rxjs'
-import { filter, takeUntil, map } from 'rxjs/operators'
-import { Key } from 'readline'
-const readline = require('readline')
+import { Observable, interval, fromEvent } from 'rxjs'
+import { filter, takeUntil, map, tap, take } from 'rxjs/operators'
+import { emitKeypressEvents, Key } from 'readline'
 
 const score: Record<string, Value> = {
     q: 0,
@@ -17,18 +16,23 @@ const score: Record<string, Value> = {
     g: 40,
     z: 100,
 }
-readline.emitKeypressEvents(process.stdin)
-process.stdin.setRawMode(true)
 
-const keyboardEvent$: Observable<Key> = fromEvent(process.stdin, 'keypress').pipe(
-    map((e: [string, Key]) => e[1]))
+process.stdin && process.stdin && process.stdin.setRawMode && process.stdin.setRawMode(true)
+emitKeypressEvents(process.stdin)
+const keypress$ = 
+    fromEvent(process.stdin, 'keypress').pipe(
+        map(([_, k]) => k))
 
-const ctrlC$: Observable<Key> = keyboardEvent$.pipe(
-    filter((k: Key) => k.name === 'c' && k.ctrl))
+const ctrlC$ = keypress$.pipe(
+    filter((k: Key) => k.ctrl === true && k.name === 'c'))
 
-const input$ = keyboardEvent$.pipe(    
-    filter((k: Key) => k.name in score),
-    takeUntil(ctrlC$))
+export const value$: Observable<Value> =
+    keypress$.pipe(
+        filter((k: Key) => Object.keys(score).includes(k.name || '')),
+        map((k: Key) => score[k.name || '']),
+        takeUntil(ctrlC$))
 
-export const vote$ =
-    input$.pipe(map((k: Key) => score[k.name]))
+// value$.subscribe(console.log, console.log, () => {
+//     console.log('End.')
+//     process.exit(0)
+// })

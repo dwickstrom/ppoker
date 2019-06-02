@@ -21,9 +21,6 @@ export const serve = (addr: string, description: string, debugMode: boolean) => 
     const initialAppState: AppState = {
         games: {[gg.id]: gg},
         connections: {},
-        role: 'system',
-        serverTime: null,
-        players: {},
     }
     
     const app: App = initApp(initialAppState)

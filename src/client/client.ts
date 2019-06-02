@@ -2,14 +2,14 @@ import { Event, _Event } from "../event";
 import { AppState } from "../app";
 const chalk = require('chalk')
 import { last, prop } from "ramda";
-import { latestFrom, UUID, toList, toLast, die } from "../utils";
+import { lastFrom, UUID, toList, toLast, die } from "../utils";
 import { Socket } from "socket.io";
 import { Value, _Game, _Vote, Vote, _GameState, GameStateLabel } from "../game";
 const io = require('socket.io-client')
 import * as Vorpal from 'vorpal'
 import { gamePage } from "./template";
 import { _Player, GameParticipant, PlayerId } from "../player";
-import { vote$ } from "./input";
+import { value$ } from "./input";
 
 
 /*
@@ -55,9 +55,11 @@ type PlayerName = string
 export type ResultPair = [PlayerName, _Vote[]]
 
 const redraw = (ui: Vorpal.UI, state: AppState[], playerId: PlayerId) => {
-  console.clear()
-  const latest: AppState = last(state)  
-  const games: Record<string, _Game> = latest.games  
+  // console.clear()
+  const games: Record<string, _Game> = 
+    lastFrom(state)
+      .map(prop('games'))
+      .reduce(toLast, {})
   
   const votes: _Vote[] = 
     toList(games)
@@ -95,7 +97,7 @@ const redraw = (ui: Vorpal.UI, state: AppState[], playerId: PlayerId) => {
 }
 
 const getGame = (state: AppState[]):_Game =>
-  latestFrom(state)
+  lastFrom(state)
     .map(prop('games'))
     .flatMap(toList)
     .reduce(toLast)
@@ -106,13 +108,12 @@ export interface _Client {
   getState: (() => AppState[]),  
   setState: ((next: AppState[]) => void),  
   getSocket: (() => Socket),
-  setSocket: ((s: Socket) => void),  
 }
 
-const Client = (gameId: UUID, playerName: string): _Client => {
+const Client = (gameId: UUID, playerName: string, socket: Socket): _Client => {
   let vorpal = new Vorpal()
   let state: any = {}
-  let _socket: Socket | null = null
+  let _socket: Socket = socket
   const client = {
     setState: (next: AppState[]) => {
       if (JSON.stringify(state) !== JSON.stringify(next)) {
@@ -128,35 +129,33 @@ const Client = (gameId: UUID, playerName: string): _Client => {
                                         , value
                                         , getGame(state).id)
                                         , connectionId: _socket.id })),      
-    setSocket: (socket: Socket) => {      
-      _socket = socket      
-      socket.emit('event', 
-                  Event('PlayerJoinedGame', { gameId
-                                            , playerId: socket.id
-                                            , name: playerName }))
-    },
     getSocket: () => _socket,
   }
-  
-  vote$.subscribe( client.emitVote
-                 , (err: any) => { console.log('Error:', err) }
-                 , () => { process.exit() })
+
+  _socket.emit('event', 
+                  Event('PlayerJoinedGame', { gameId
+                                            , playerId: _socket.id
+                                            , name: playerName }))
+
+  value$.subscribe(
+    (value: Value) => client.emitVote(value), 
+    (err: any) => { console.log('Error:', err) }, 
+    () => { process.exit() })
 
   return client
 }
 
-export const joinGame = (gameId: UUID, addr: string, playerName: string) => {
-  const client = Client(gameId, playerName)
-  
-  const socket = io(addr)
+export const joinGame = 
+  (gameId: UUID, addr: string, playerName: string) => {  
+    const socket = io(addr)  
 
-  socket.on('connect', () => {      
-    client.setSocket(socket)
-    socket.on('state', (state: AppState[]) => client.setState(state))
-    socket.on('disconnect', die('\n 🎮  ' + chalk.magenta('Game over') + '\n'))
-    socket.on('error', (err: any) => {
-      console.log(' 💥  ' + chalk.red(err.toString()) + '\n')
-      process.exit()
+    socket.on('connect', () => {      
+      const client = Client(gameId, playerName, socket)
+      socket.on('state', (state: AppState[]) => client.setState(state))
+      socket.on('disconnect', die('\n 🎮  ' + chalk.magenta('Game over') + '\n'))
+      socket.on('error', (err: any) => {
+        console.log(' 💥  ' + chalk.red(err.toString()) + '\n')
+        process.exit()
+      })
     })
-  })
-}
+  }

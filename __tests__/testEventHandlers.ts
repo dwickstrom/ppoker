@@ -4,6 +4,8 @@ import { Event, playerVoted, playerJoinedGame, clientDisconnected } from "../src
 import { now } from "../src/utils"
 import { AppState } from "../src/app"
 import { currentGameState } from "../src/websocket";
+const socket = require('socket.io')
+
 
 describe('AppStateReducers', () => {
     test('playerJoinedGame', () => {
@@ -16,14 +18,12 @@ describe('AppStateReducers', () => {
 
         let appStateBuffer: AppState[] = [{
             games: {[game.id]: game},
-            connections: null,
-            role: null,
-            serverTime: new Date(),
-            players: {'pid': Player('player-name', 'pid')}
+            connections: {},
         }]
-        
+
+
         let started: GameStateLabel = 'started'
-        let actualStateBuffer = playerJoinedGame(playerJoinedGameEvent, null)(appStateBuffer)
+        let actualStateBuffer = playerJoinedGame(playerJoinedGameEvent, socket)(appStateBuffer)
         
         expect(actualStateBuffer[0].games[game.id].players['pid']).not.toBeUndefined
         expect(actualStateBuffer.length).toBe(1)
@@ -44,14 +44,11 @@ describe('AppStateReducers', () => {
 
         let appStateBuffer: AppState[] = [{
             games: {[game.id]: game},
-            connections: null,
-            role: null,
-            serverTime: new Date(),
-            players: {pid1: Player('player-name', pid1)}
+            connections: {},
         }]
 
 
-        let actual = playerVoted(playerVotedEvent, null)(appStateBuffer)
+        let actual = playerVoted(playerVotedEvent, socket)(appStateBuffer)
 
         expect(actual[0].games[game.id].votes.length).toBe(1)
         expect(actual[0].games[game.id].votes[0].playerId).toBe(pid1)
@@ -80,19 +77,16 @@ describe('AppStateReducers', () => {
 
         let stateBeforeFirstVote: AppState[] = [{
             games: {[game.id]: game},
-            connections: null,
-            role: null,
-            serverTime: new Date(),
-            players: {},
+            connections: {},
         }]
 
 
-        let stateAfterFirstVote: AppState[] = playerVoted(player1VotedEvent, null)(stateBeforeFirstVote)
+        let stateAfterFirstVote: AppState[] = playerVoted(player1VotedEvent, socket)(stateBeforeFirstVote)
         let started: GameStateLabel = 'started'
         expect(stateAfterFirstVote[0].games[game.id].votes.length).toBe(1)
         expect(stateAfterFirstVote[0].games[game.id].state[1].label).toBe(started)
 
-        let stateAfterLastVote: AppState[] = playerVoted(player2VotedEvent, null)(stateAfterFirstVote) 
+        let stateAfterLastVote: AppState[] = playerVoted(player2VotedEvent, socket)(stateAfterFirstVote) 
 
         expect(stateAfterLastVote[0].games[game.id].votes.length).toBe(2)
         expect(stateAfterLastVote[0].games[game.id].votes[1].playerId).toBe(pid2)
@@ -135,28 +129,25 @@ describe('AppStateReducers', () => {
 
         let stateBeforeFirstVote: AppState[] = [{
             games: {[game.id]: game},
-            connections: null,
-            role: null,
-            serverTime: new Date(),
-            players: {},
+            connections: {},
         }]
 
         
-        let stateAfterFirstVote: AppState[] = playerVoted(player1VotedEvent, null)(stateBeforeFirstVote)        
+        let stateAfterFirstVote: AppState[] = playerVoted(player1VotedEvent, socket)(stateBeforeFirstVote)        
 
         expect(stateAfterFirstVote[0].games[game.id].votes.length).toBe(1)
         expect(stateAfterFirstVote[0].games[game.id].state[1].label).toBe('started')
 
-        let stateAfterSecondVote: AppState[] = playerVoted(player2VotedEvent, null)(stateAfterFirstVote) 
+        let stateAfterSecondVote: AppState[] = playerVoted(player2VotedEvent, socket)(stateAfterFirstVote) 
 
-        let stateAfterThirdVote: AppState[] = playerVoted(player2VotedAgainEvent, null)(stateAfterSecondVote) 
+        let stateAfterThirdVote: AppState[] = playerVoted(player2VotedAgainEvent, socket)(stateAfterSecondVote) 
 
         expect(stateAfterThirdVote[0].games[game.id].votes.length).toBe(2)
         expect(stateAfterThirdVote[0].games[game.id].votes[1].playerId).toBe(pid2)
         expect(stateAfterThirdVote[0].games[game.id].votes[1].value).toBe(13)
         expect(stateAfterThirdVote[0].games[game.id].state[1].label).toBe('started')
 
-        let stateAfterFourthVote: AppState[] = playerVoted(player3VotedEvent, null)(stateAfterThirdVote) 
+        let stateAfterFourthVote: AppState[] = playerVoted(player3VotedEvent, socket)(stateAfterThirdVote) 
 
         expect(stateAfterFourthVote[0].games[game.id].votes.length).toBe(3)
         expect(stateAfterFourthVote[0].games[game.id].votes[2].playerId).toBe(pid3)
@@ -178,14 +169,11 @@ describe('AppStateReducers', () => {
         let stateBeforeDisconnect: AppState[] = [{
             games: {[game.id]: game},
             connections: {},
-            role: null,
-            serverTime: new Date(),
-            players: {},
         }]
 
         let stateAfterPlayer3Disconnects = 
             clientDisconnected(Event('ClientDisconnected', {
-                connection: {id: 'pid3'}}), null)(stateBeforeDisconnect)
+                connection: {id: 'pid3'}}), socket)(stateBeforeDisconnect)
 
         let decreasedPlayersPool = stateAfterPlayer3Disconnects[0].games[game.id].players
 
@@ -275,10 +263,7 @@ describe('Other utils', () => {
         let game:_Game = Game('a game', {})        
         let stateBuffer: AppState[] = [{
             games: {[game.id]: game},
-            connections: null,
-            role: null,
-            serverTime: new Date(),
-            players: {},
+            connections: {},
         }]
         let actual = currentGameState(stateBuffer)
         expect(actual.label).toBe('initialized')
