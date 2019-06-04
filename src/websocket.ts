@@ -6,7 +6,7 @@ import { map, mergeMap, takeWhile, catchError } from 'rxjs/operators'
 import { Socket, EngineSocket } from 'socket.io';
 import { Event, _Event } from './event';
 import { prop } from 'ramda';
-import { toLast, toList, lastFrom, raise } from './utils';
+import { toList, lastFrom, raise } from './utils';
 import { _GameState, GameStateLabel } from './game';
   
 
@@ -62,16 +62,20 @@ const state$ =
         map(app.handleEvent(socket)),
         // distinctUntilChanged(),
         mergeMap(handleEmission(socket)),
-        takeWhile((s: AppState[]) => aliveStates.includes(currentGameState(s).label)))
+        takeWhile((s: AppState[]) => 
+          currentGameState(s)
+            .map(prop('label'))
+            .map(label => aliveStates.includes(label))
+            .some(x => x)))
 
 
 export const currentGameState = 
-  (buffer: AppState[]): _GameState =>
+  (buffer: AppState[]): _GameState[] =>
     lastFrom(buffer)
       .map(prop('games'))
       .flatMap(toList)
-      .flatMap(prop('state'))
-      .reduce(toLast)
+      .map(prop('state'))
+      .flatMap(lastFrom)
 
 export const initState$ =
   (app: App, server: Server) => 

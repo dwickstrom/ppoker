@@ -4,7 +4,7 @@ import { initState$ } from "./websocket"
 const chalk = require('chalk')
 const clipboardy = require('clipboardy')
 import * as http from 'http'
-import { UUID, die, toList, toLast } from "./utils";
+import { UUID, die } from "./utils";
 
 const connectionCmd = (addr: string, gameId: UUID, devMode: boolean) => {
     let executable = devMode ? 'node ./build/main.js' : './ppoker'

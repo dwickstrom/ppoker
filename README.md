@@ -25,7 +25,4 @@ This command is output by the server, and the user only has to update the name
 		- user not allowed to vote
 		- user votes on game in invalid state
 - breakout code to `GameStateReducer`s
-- fsm for game state changes
-- retries for state emission
 - display game state in client
-- strict null checks

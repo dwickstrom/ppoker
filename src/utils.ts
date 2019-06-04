@@ -23,9 +23,6 @@ export const toList =
   <V>(obj: Record<string | number | symbol, V>): V[] =>
     Object.keys(obj).map(k => obj[k])
 
-export const toLast =
-  <T>(_: T, x: T) => x
-
 export const fst =
     <T, _>(pair: [T, _]): T =>
       pair[0]

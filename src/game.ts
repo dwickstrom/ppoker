@@ -1,4 +1,4 @@
-import { UUID, now, toList, lastFrom, toLast } from "./utils";
+import { UUID, now, toList, lastFrom } from "./utils";
 import { PlayerPool, _Player, PlayerId } from "./player";
 import { set, lensPath, prop, last } from "ramda";
 import { v4 as uuid } from 'uuid'
@@ -100,10 +100,10 @@ export const removeStale =
     }), {})
 
 const currentStateLabelFrom = 
-  (game: _Game): GameStateLabel =>
+  (game: _Game): GameStateLabel[] =>
     lastFrom(game.state)
       .map(prop('label'))
-      .reduce(toLast)
+
 
 // canVote :: PlayerId -> Game -> Bool
 export const canVote = 
@@ -111,7 +111,8 @@ export const canVote =
     (game: _Game): boolean => 
          Object.keys(game.players).includes(playerId) // Player has joined this game
       && Array.of<GameStateLabel>('initialized', 'started')
-           .includes(currentStateLabelFrom(game)) // Game is in valid state
+          .map(l => currentStateLabelFrom(game).includes(l))
+          .some(x => x) // Game is in valid state
 
 export const isAbandoned = 
   (players: PlayerPool): boolean =>

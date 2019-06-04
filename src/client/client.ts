@@ -2,7 +2,7 @@ import { Event, _Event } from "../event";
 import { AppState } from "../app";
 const chalk = require('chalk')
 import { last, prop } from "ramda";
-import { lastFrom, UUID, toList, toLast, die } from "../utils";
+import { lastFrom, UUID, toList, die } from "../utils";
 import { Socket } from "socket.io";
 import { Value, _Game, _Vote, Vote, _GameState, GameStateLabel } from "../game";
 const io = require('socket.io-client')
@@ -56,17 +56,18 @@ export type ResultPair = [PlayerName, _Vote[]]
 
 const redraw = (ui: Vorpal.UI, state: AppState[], playerId: PlayerId) => {
   // console.clear()
-  const games: Record<string, _Game> = 
+  const games: Record<string, _Game>[] = 
     lastFrom(state)
       .map(prop('games'))
-      .reduce(toLast, {})
   
   const votes: _Vote[] = 
-    toList(games)
-      .flatMap(g => g.votes)
+    games
+      .flatMap(toList)
+      .flatMap(prop('votes'))
   
   const playerResults: ResultPair[] =
-    toList(games)
+    games
+      .flatMap(toList)
       .map(prop('players'))
       .flatMap(toList)
       .filter((player: GameParticipant) => player.leftAt === null)
@@ -76,16 +77,18 @@ const redraw = (ui: Vorpal.UI, state: AppState[], playerId: PlayerId) => {
           .filter((v: _Vote) => v.playerId === player.playerId)
       ])
 
-  const description: string = 
-    toList(games)
+  const description: string[] = 
+    games.map(toList)
+      .flatMap(lastFrom)
       .map(prop('description'))
-      .reduce(toLast, '')
+
   
-  const gameState: GameStateLabel = 
-    toList(games)
-      .reduce(toLast)
-      .state.map(prop('label'))
-            .reduce(toLast)
+  const gameState: GameStateLabel[] = 
+    games.map(toList)
+      .flatMap(lastFrom)
+      .map(prop('state'))
+      .flatMap(lastFrom)
+      .map(prop('label'))
 
   ui.redraw(
     chalk.yellow(gamePage({
@@ -96,11 +99,11 @@ const redraw = (ui: Vorpal.UI, state: AppState[], playerId: PlayerId) => {
     })))
 }
 
-const getGame = (state: AppState[]):_Game =>
+const getGame = (state: AppState[]): _Game[] =>
   lastFrom(state)
     .map(prop('games'))
-    .flatMap(toList)
-    .reduce(toLast)
+    .map(toList)
+    .flatMap(lastFrom)
 
 export interface _Client {
   redraw: (() => void),
@@ -124,11 +127,13 @@ const Client = (gameId: UUID, playerName: string, socket: Socket): _Client => {
     getState: (): AppState[] => state,
     redraw: () => redraw(vorpal.ui, state, _socket.id),
     emitVote: (value: Value) =>
-      _socket.emit('event', 
-                   Event('PlayerVoted', { vote: Vote(_socket.id
-                                        , value
-                                        , getGame(state).id)
-                                        , connectionId: _socket.id })),      
+      getGame(state)
+        .map(({id}) => 
+          _socket.emit('event', 
+            Event('PlayerVoted', {
+              vote: Vote(_socket.id, value, id), 
+              connectionId: _socket.id })))
+      ,      
     getSocket: () => _socket,
   }
 

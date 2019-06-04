@@ -40,7 +40,7 @@ const resultsTable =
   }
     
 
-const playersTable = ({votes, description, gameState, me}: {votes: any, description: string, gameState: GameStateLabel, me: PlayerId}) => {
+const playersTable = ({votes, description, gameState, me}: {votes: any, description: string, gameState: GameStateLabel[], me: PlayerId}) => {
 return ` 🎲  ${chalk.magenta(description)}
 ${asciiTable(votes, gameState, me)}`
 }

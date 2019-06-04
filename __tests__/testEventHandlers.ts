@@ -266,6 +266,6 @@ describe('Other utils', () => {
             connections: {},
         }]
         let actual = currentGameState(stateBuffer)
-        expect(actual.label).toBe('initialized')
+        expect(actual[0].label).toBe('initialized')
     })
 })
