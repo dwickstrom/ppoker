@@ -1,7 +1,7 @@
 import { Event, _Event } from "../event";
 import { AppState } from "../app";
 const chalk = require('chalk')
-import { last, prop } from "ramda";
+import { prop } from "ramda";
 import { lastFrom, UUID, toList, die } from "../utils";
 import { Socket } from "socket.io";
 import { Value, _Game, _Vote, Vote, _GameState, GameStateLabel } from "../game";

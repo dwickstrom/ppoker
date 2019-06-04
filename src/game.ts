@@ -1,6 +1,6 @@
 import { UUID, now, toList, lastFrom } from "./utils";
 import { PlayerPool, _Player, PlayerId } from "./player";
-import { set, lensPath, prop, last } from "ramda";
+import { set, lensPath, prop } from "ramda";
 import { v4 as uuid } from 'uuid'
 
 export type Value = 0 | 0.5 | 1 | 2| 3 | 5 | 8 | 13 | 20 | 40 | 100

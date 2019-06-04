@@ -1,4 +1,4 @@
-import { GameStateLabel, Value, _Vote } from "../game";
+import { GameStateLabel, _Vote } from "../game";
 import { PlayerId } from "../player";
 import { snd } from "../utils";
 import { ResultPair } from "./client";

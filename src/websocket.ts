@@ -1,7 +1,7 @@
 import { Server } from 'http'
 import { AppState, App } from './app'
 const io = require('socket.io')
-import { merge, interval, of, fromEvent, Observable, throwError } from 'rxjs'
+import { merge, interval, of, fromEvent, Observable } from 'rxjs'
 import { map, mergeMap, takeWhile, catchError } from 'rxjs/operators'
 import { Socket, EngineSocket } from 'socket.io';
 import { Event, _Event } from './event';

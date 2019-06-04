@@ -1,6 +1,6 @@
 import { Value } from '../game'
-import { Observable, interval, fromEvent } from 'rxjs'
-import { filter, takeUntil, map, tap, take } from 'rxjs/operators'
+import { Observable, fromEvent } from 'rxjs'
+import { filter, takeUntil, map } from 'rxjs/operators'
 import { emitKeypressEvents, Key } from 'readline'
 
 const score: Record<string, Value> = {
