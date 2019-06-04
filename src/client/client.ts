@@ -4,7 +4,7 @@ const chalk = require('chalk')
 import { prop } from "ramda";
 import { lastFrom, UUID, toList, die } from "../utils";
 import { Socket } from "socket.io";
-import { Value, _Game, _Vote, Vote, _GameState, GameStateLabel } from "../game";
+import { Value, _Game, _Vote, Vote, _GameState, GameStateLabel, getGames, getGame } from "../game";
 const io = require('socket.io-client')
 import * as Vorpal from 'vorpal'
 import { gamePage } from "./template";
@@ -52,25 +52,25 @@ import { value$ } from "./input";
 
 type PlayerName = string
 
+const activePlayersPredicate = 
+    (player: GameParticipant): boolean => player.leftAt === null
+
 export type ResultPair = [PlayerName, _Vote[]]
 
 const redraw = (ui: Vorpal.UI, state: AppState[], playerId: PlayerId) => {
-  // console.clear()
-  const games: Record<string, _Game>[] = 
-    lastFrom(state)
-      .map(prop('games'))
+
   
   const votes: _Vote[] = 
-    games
+    getGames(state)
       .flatMap(toList)
       .flatMap(prop('votes'))
   
   const playerResults: ResultPair[] =
-    games
+    getGames(state)
       .flatMap(toList)
       .map(prop('players'))
       .flatMap(toList)
-      .filter((player: GameParticipant) => player.leftAt === null)
+      .filter(activePlayersPredicate)
       .map((player: GameParticipant): ResultPair => [
         player.name, 
         votes
@@ -78,13 +78,15 @@ const redraw = (ui: Vorpal.UI, state: AppState[], playerId: PlayerId) => {
       ])
 
   const description: string[] = 
-    games.map(toList)
+    getGames(state)
+      .map(toList)
       .flatMap(lastFrom)
       .map(prop('description'))
 
   
   const gameState: GameStateLabel[] = 
-    games.map(toList)
+    getGames(state)
+      .map(toList)
       .flatMap(lastFrom)
       .map(prop('state'))
       .flatMap(lastFrom)
@@ -98,12 +100,6 @@ const redraw = (ui: Vorpal.UI, state: AppState[], playerId: PlayerId) => {
       me: playerId
     })))
 }
-
-const getGame = (state: AppState[]): _Game[] =>
-  lastFrom(state)
-    .map(prop('games'))
-    .map(toList)
-    .flatMap(lastFrom)
 
 export interface _Client {
   redraw: (() => void),

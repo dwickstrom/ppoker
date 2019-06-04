@@ -1,5 +1,7 @@
 export type UUID = string
 
+export type Index = string | number | symbol
+
 export const die =
   (message: string) =>
     () => {
@@ -20,7 +22,7 @@ export const firstFrom = <T>(list: T[]): T[] =>
 export const now = () => new Date()
 
 export const toList = 
-  <V>(obj: Record<string | number | symbol, V>): V[] =>
+  <V>(obj: Record<Index, V>): V[] =>
     Object.keys(obj).map(k => obj[k])
 
 export const fst =
@@ -35,10 +37,10 @@ export const raise =
   (err: any): never => { throw err }
 
 export const avg = 
-  (ns: number[]) =>
+  (ns: number[]): number =>
     ns.reduce((x, y) => x + y, 0) / ns.length
 
-export const median = (ns: number[]) => {
+export const median = (ns: number[]): number => {
   const mid = Math.floor(ns.length / 2)
   const nums = [...ns].sort((a, b) => a - b)
   return ns.length % 2 !== 0 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2

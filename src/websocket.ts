@@ -7,7 +7,7 @@ import { Socket, EngineSocket } from 'socket.io';
 import { Event, _Event } from './event';
 import { prop } from 'ramda';
 import { toList, lastFrom, raise } from './utils';
-import { _GameState, GameStateLabel } from './game';
+import { _GameState, GameStateLabel, getGames } from './game';
   
 
 const ticker$ = 
@@ -71,8 +71,7 @@ const state$ =
 
 export const currentGameState = 
   (buffer: AppState[]): _GameState[] =>
-    lastFrom(buffer)
-      .map(prop('games'))
+    getGames(buffer)
       .flatMap(toList)
       .map(prop('state'))
       .flatMap(lastFrom)

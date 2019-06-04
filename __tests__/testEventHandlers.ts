@@ -21,7 +21,6 @@ describe('AppStateReducers', () => {
             connections: {},
         }]
 
-
         let started: GameStateLabel = 'started'
         let actualStateBuffer = playerJoinedGame(playerJoinedGameEvent, socket)(appStateBuffer)
         

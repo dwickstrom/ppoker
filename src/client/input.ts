@@ -31,8 +31,3 @@ export const value$: Observable<Value> =
         filter((k: Key) => Object.keys(score).includes(k.name || '')),
         map((k: Key) => score[k.name || '']),
         takeUntil(ctrlC$))
-
-// value$.subscribe(console.log, console.log, () => {
-//     console.log('End.')
-//     process.exit(0)
-// })

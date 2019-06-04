@@ -2,6 +2,7 @@ import { UUID, now, toList, lastFrom } from "./utils";
 import { PlayerPool, PlayerId } from "./player";
 import { set, lensPath, prop } from "ramda";
 import { v4 as uuid } from 'uuid'
+import { AppState } from "./app";
 
 export type Value = 0 | 0.5 | 1 | 2| 3 | 5 | 8 | 13 | 20 | 40 | 100
 
@@ -57,6 +58,16 @@ export const Game =
       votes: [],
       state: [GameState('initialized')]
     })
+
+export const getGames = 
+  (state: AppState[]): Record<string, _Game>[] =>
+    lastFrom(state)
+      .map(prop('games'))
+  
+export const getGame = (state: AppState[]): _Game[] =>
+  getGames(state)
+    .map(toList)
+    .flatMap(lastFrom)
 
 export const leaveGames =
   (playerId: PlayerId) =>

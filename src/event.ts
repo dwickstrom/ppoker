@@ -1,5 +1,5 @@
 import { AppState } from './app'
-import { lastFrom, now } from './utils';
+import { lastFrom, now, Index } from './utils';
 import { PlayerId } from './player';
 import { _Game, leaveGames, removeStale, _Vote, addVote } from './game';
 import { Socket } from 'socket.io';
@@ -31,15 +31,15 @@ export const appendTo =
       buffer.concat(next).slice(buffer.length-BUFFER_SIZE)
 
 export const removeById =
-  (id: string | number | symbol) =>
-    (obj: Record<string | number | symbol, any>) =>
-      Object.keys(obj).reduce((acc, x) =>
-        x === id ? acc : ({
-          ...acc,
-          [x]: obj[x]
-        }), {})
+  (id: Index) =>
+    (obj: Record<Index, any>) =>
+      Object.keys(obj)
+        .reduce((acc: Record<Index, any>, x: any) =>
+          x === id 
+          ? acc 
+          : ({...acc, [x]: obj[x]}), {})
 
-const addPlayer = 
+const addPlayer =
   (playerId: PlayerId, name: string) =>
     (game: _Game): _Game =>
       ({
