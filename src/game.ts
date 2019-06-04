@@ -1,5 +1,5 @@
 import { UUID, now, toList, lastFrom } from "./utils";
-import { PlayerPool, _Player, PlayerId } from "./player";
+import { PlayerPool, PlayerId } from "./player";
 import { set, lensPath, prop } from "ramda";
 import { v4 as uuid } from 'uuid'
 
@@ -39,7 +39,7 @@ export const GameState =
     ({label, observedAt: now()})
 
 export interface _Game {
-  id: string,
+  id: UUID,
   description: string,
   players: PlayerPool,
   votes: _Vote[],

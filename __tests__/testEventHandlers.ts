@@ -1,5 +1,5 @@
 import { Games, leaveGames, Game, GameStateLabel, isAbandoned, Vote, addVote, canVote, GameState, _Game } from "../src/game"
-import { Player, PlayerPool } from "../src/player"
+import { PlayerPool } from "../src/player"
 import { Event, playerVoted, playerJoinedGame, clientDisconnected } from "../src/event"
 import { now } from "../src/utils"
 import { AppState } from "../src/app"

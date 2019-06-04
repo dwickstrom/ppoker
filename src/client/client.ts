@@ -8,7 +8,7 @@ import { Value, _Game, _Vote, Vote, _GameState, GameStateLabel } from "../game";
 const io = require('socket.io-client')
 import * as Vorpal from 'vorpal'
 import { gamePage } from "./template";
-import { _Player, GameParticipant, PlayerId } from "../player";
+import { GameParticipant, PlayerId } from "../player";
 import { value$ } from "./input";
 
 

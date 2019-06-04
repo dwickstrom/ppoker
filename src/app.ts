@@ -1,7 +1,6 @@
 import { Games } from './game'
 import * as handle from './event'
 import { Socket } from 'socket.io';
-import { _Player } from './player';
 import { Connections } from './connection';
 
 export interface AppState {
