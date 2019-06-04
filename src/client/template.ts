@@ -32,9 +32,9 @@ const resultsBox = (result: number[]) =>
 `
 
 const resultsTable = 
-  ({votes, gameState}: {votes: ResultPair[], gameState: GameStateLabel}) => {
+  ({votes, gameState}: {votes: ResultPair[], gameState: GameStateLabel[]}) => {
 
-    return gameState === 'completed'
+    return gameState.map(label => label === 'completed').some(x => x)
       ? resultsBox(votes.flatMap(snd).map(prop('value')))
       : ''
   }
