@@ -6,7 +6,7 @@ A planning poker server and client.
 Download [osx-binary](https://github.com/dwickstrom/ppoker/raw/master/dist/)
 
 ### Start game 
-`./ppoker serve -a http://localhost:8999 -t "Update Kafka"`
+`./ppoker server -a http://localhost:8999 -t "Update Kafka"`
 
 ### Join game
 `./ppoker client --a <server_address> -g <game_id> -n <player_name>`
