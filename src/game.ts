@@ -69,14 +69,14 @@ export const getGame = (state: AppState[]): _Game[] =>
     .map(toList)
     .flatMap(lastFrom)
 
-export const leaveGames =
+export const leaveAllGames =
   (playerId: PlayerId) =>
     (games: Games): Games => {
       return Object.keys(games).reduce((acc, gid) => {
         let playerLens = lensPath([playerId, 'leftAt'])
         
         let nextPlayers = 
-              Object.keys(games[gid].players).length 
+             Object.keys(games[gid].players).length 
           && Object.keys(games[gid].players).includes(playerId)
               ? set(playerLens, now(), games[gid].players)
               : games[gid].players
@@ -86,7 +86,7 @@ export const leaveGames =
           [gid]: {
             ...games[gid], 
             players: nextPlayers,
-            state: isAbandoned(nextPlayers) && ['initialized', 'started'].includes(games[gid].state[games[gid].state.length-1].label)
+            state: isAbandoned(nextPlayers) && ['initialized', 'started'].includes(games[gid].state[games[gid].state.length - 1].label)
                     ? [...games[gid].state, {label: 'abandoned', observedAt: now()}]
                     : games[gid].state
           }
@@ -105,24 +105,24 @@ const isStale = (game: _Game) =>
 
 export const removeStale = 
   (games: Games): Games =>
-    Object.keys(games).reduce((acc, id) => isStale(games[id]) ? acc : ({
-      ...acc,
-      [id]: games[id]
-    }), {})
+    Object.keys(games)
+    .reduce((acc, id) => 
+      isStale(games[id]) 
+      ? acc 
+      : ({...acc, [id]: games[id]})
+    , {})
 
 const currentStateLabelFrom = 
   (game: _Game): GameStateLabel[] =>
     lastFrom(game.state)
       .map(prop('label'))
 
-
-// canVote :: PlayerId -> Game -> Bool
 export const canVote = 
   (playerId: PlayerId) =>
     (game: _Game): boolean => 
          Object.keys(game.players).includes(playerId) // Player has joined this game
       && Array.of<GameStateLabel>('initialized', 'started')
-          .map(l => currentStateLabelFrom(game).includes(l))
+          .map(validLabel => currentStateLabelFrom(game).includes(validLabel))
           .some(x => x) // Game is in valid state
 
 export const isAbandoned = 
@@ -137,7 +137,6 @@ const everyoneHasVoted =
        game.votes.length === toList(game.players).filter(p => p.leftAt === null).length
     && toList(game.players).length > 1
         
-
 const updateGameState =
   (game: _Game): _GameState[] => {
     let latestGameState = lastFrom(game.state)
@@ -168,4 +167,3 @@ export const addVote =
       }
       return game
     }
-         

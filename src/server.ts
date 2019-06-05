@@ -33,7 +33,6 @@ export const serve = (addr: string, description: string, debugMode: boolean) => 
         .subscribe((s: AppState[]): void => {            
             if (debugMode)
                 console.log(JSON.stringify(s, null, 2))
-            
         }, err => {
             console.error('ERROR', err)
         }, () => setTimeout(die('\n 🎮  ' + chalk.magenta('Game over') + '\n'), 1000))

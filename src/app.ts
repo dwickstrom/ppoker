@@ -17,11 +17,11 @@ export interface App {
 
 const eventHandler =
     (socket: Socket,appState: AppState[], event: handle._Event): AppState[] =>
-          event.label === 'ClientConnected'      ? handle.clientConnected(event, socket)(appState)
-        : event.label === 'ClientDisconnected'   ? handle.clientDisconnected(event, socket)(appState)    
-        : event.label === 'PlayerJoinedGame'     ? handle.playerJoinedGame(event, socket)(appState)
-        : event.label === 'PlayerVoted'          ? handle.playerVoted(event, socket)(appState)
-        : /* otherwise */                          handle.theUnknown(event, socket)(appState)
+            event.label === 'ClientConnected'      ? handle.clientConnected(event, socket)(appState)
+        :   event.label === 'ClientDisconnected'   ? handle.clientDisconnected(event, socket)(appState)    
+        :   event.label === 'PlayerJoinedGame'     ? handle.playerJoinedGame(event, socket)(appState)
+        :   event.label === 'PlayerVoted'          ? handle.playerVoted(event, socket)(appState)
+        :   /* otherwise */                          handle.theUnknown(event, socket)(appState)
 
 export const initApp = (initialState: AppState) => {
     const app: App = {

@@ -1,16 +1,16 @@
 import { GameStateLabel, _Vote } from "../game";
 import { PlayerId } from "../player";
-import { snd } from "../utils";
+import { snd, fst } from "../utils";
 import { ResultPair } from "./client";
 import { prop } from "ramda";
 
 export const asciiTable = (results: ResultPair[], gameState: GameStateLabel[], me: PlayerId): string =>
-  results.reduce((acc: string, result: ResultPair) => {    
-      return `${acc}\n${createRow(result, gameState, me, results)}`
-  }, results.length ? '\n' + createCellBorder(results[0]) : '')
+  results.reduce((acc: string, result: ResultPair) => 
+    `${acc}\n${createRow(result, gameState, me, results)}`, 
+        results.length ? '\n' + createCellBorder(results[0]) : '')
 
 const createLine = (n: number) =>
-  '+' + Array(n).fill('.').map(() => '-').join('')
+  '+' + Array(n).fill('-').join('')
 
 const createCellBorder = (data: any) =>
   Array(data.length)
@@ -20,13 +20,15 @@ const createCellBorder = (data: any) =>
     .join('') + '+'
 
 const createRow = (result: ResultPair, gameState: GameStateLabel[], me: PlayerId, results: ResultPair[]) => 
-`│ ${result[0].padEnd(22)} │ ${maskValue(gameState, snd(result), me, results).toString().padEnd(22)} │
+`│ ${fst(result).padEnd(22)} │ ${maskValue(gameState, snd(result), me, results).toString().padEnd(22)} │
 ${createCellBorder(result)}`
 
 
-const isMe = (val: _Vote[], pid: PlayerId) => 
-     val.length
-  && val[0].playerId === pid
+const isMe = (vote: _Vote[], pid: PlayerId): boolean => 
+    vote
+    .map(prop('playerId'))
+    .map(playerId => pid === playerId)
+    .every(x => x)
 
 export const maskValue = 
   (gameState: GameStateLabel[], vote: _Vote[], me: PlayerId, results: ResultPair[]): string[] => {
@@ -41,10 +43,10 @@ export const maskValue =
       .map(prop('playerId'))
       .map(pid => 
         results
-          .flatMap(snd)
-          .map(prop('playerId'))
-          .includes(pid))
-      .some(x => x)
-      ? ['***']
-      : ['']
+        .flatMap(snd)
+        .map(prop('playerId'))
+        .includes(pid))
+            .some(x => x)
+            ? ['***']
+            : ['']
   }

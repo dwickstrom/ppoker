@@ -1,7 +1,7 @@
 import { AppState } from './app'
 import { lastFrom, now, Index } from './utils';
 import { PlayerId } from './player';
-import { _Game, leaveGames, removeStale, _Vote, addVote } from './game';
+import { _Game, leaveAllGames, removeStale, _Vote, addVote } from './game';
 import { Socket } from 'socket.io';
 
 export type EventLabel =
@@ -62,18 +62,18 @@ type AppStateReducer = ((e: _Event, socket: Socket) => (s: AppState[]) => AppSta
 
 export const clientDisconnected: AppStateReducer =
   (event: _Event, _: Socket) =>
-    buffer =>
+    (buffer: AppState[]) =>
       lastFrom(buffer)
         .map((latest: AppState) => ({
           ...latest,
           connections: removeById(event.payload.connection.id)(latest.connections),
-          games: leaveGames(event.payload.connection.id)(latest.games),
+          games: leaveAllGames(event.payload.connection.id)(latest.games),
         }))
         .flatMap(appendTo(buffer))
 
 export const playerJoinedGame: AppStateReducer =
   (event: _Event, socket: Socket) =>
-    buffer =>
+    (buffer: AppState[]) =>
       lastFrom(buffer)
         .map((latest: AppState) => {
           if (Object.keys(latest.games).includes(event.payload.gameId)) {
@@ -93,7 +93,7 @@ export const playerJoinedGame: AppStateReducer =
 
 export const timeElapsed: AppStateReducer =
   _ =>
-    buffer =>
+    (buffer: AppState[]) =>
       lastFrom(buffer)
         .map((latest: AppState) => ({
           ...latest,
@@ -103,7 +103,7 @@ export const timeElapsed: AppStateReducer =
 
 export const playerVoted: AppStateReducer =
   (event: _Event, socket: Socket) =>
-    buffer =>
+    (buffer: AppState[]) =>
       lastFrom(buffer)
         .map((latest: AppState) =>      
            ({
@@ -119,7 +119,7 @@ export const playerVoted: AppStateReducer =
 
 export const clientConnected: AppStateReducer =
   (event: _Event, socket: Socket) =>
-    buffer =>
+    (buffer: AppState[]) =>
       lastFrom(buffer)
         .map((latest: AppState) => ({
           ...latest,
@@ -129,4 +129,4 @@ export const clientConnected: AppStateReducer =
         .flatMap(appendTo(buffer))
 
 export const theUnknown: AppStateReducer =
-  _ => buffer => buffer
+  _ => (buffer: AppState[]) => buffer

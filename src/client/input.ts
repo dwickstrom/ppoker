@@ -17,7 +17,7 @@ const score: Record<string, Value> = {
     z: 100,
 }
 
-process.stdin && process.stdin && process.stdin.setRawMode && process.stdin.setRawMode(true)
+process.stdin && process.stdin.setRawMode && process.stdin.setRawMode(true)
 emitKeypressEvents(process.stdin)
 const keypress$ = 
     fromEvent(process.stdin, 'keypress').pipe(
