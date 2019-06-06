@@ -21,7 +21,7 @@ process.stdin && process.stdin.setRawMode && process.stdin.setRawMode(true)
 emitKeypressEvents(process.stdin)
 const keypress$ = 
     fromEvent(process.stdin, 'keypress').pipe(
-        map(([_, k]) => k))
+        map(([_, k]: any) => k))
 
 const ctrlC$ = keypress$.pipe(
     filter((k: Key) => k.ctrl === true && k.name === 'c'))

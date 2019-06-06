@@ -1,4 +1,4 @@
-import { Games, leaveGames, Game, GameStateLabel, isAbandoned, Vote, addVote, canVote, GameState, _Game } from "../src/game"
+import { Games, leaveAllGames, Game, GameStateLabel, isAbandoned, Vote, addVote, canVote, GameState, _Game } from "../src/game"
 import { PlayerPool } from "../src/player"
 import { Event, playerVoted, playerJoinedGame, clientDisconnected } from "../src/event"
 import { now } from "../src/utils"
@@ -188,7 +188,7 @@ describe('Game utils', () => {
         let game = Game('foo', {'connection-id': {joinedAt: now(), leftAt: null, name: 'foo-name', playerId: 'pid'}, })
         let games = { [game.id]: game }
         
-        let actual: Games = leaveGames('connection-id')(games)
+        let actual: Games = leaveAllGames('connection-id')(games)
         
         expect(actual[game.id].players['connection-id']).toHaveProperty('leftAt')
         expect(actual[game.id].players['connection-id'].leftAt).not.toBe(null)
@@ -198,7 +198,7 @@ describe('Game utils', () => {
         let game = Game('foo', {'connection-id': {joinedAt: now(), leftAt: null, name: 'foo-name', playerId: 'pid'}})
         let games = { [game.id]: game }
 
-        let actual: Games = leaveGames('connection-id')(games)
+        let actual: Games = leaveAllGames('connection-id')(games)
 
         let expected: GameStateLabel = 'abandoned'        
         expect(actual[game.id].state[1].label).toBe(expected)

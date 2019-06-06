@@ -28,7 +28,7 @@ const connection$ =
 const event$ = 
     (socket: Socket): Observable<_Event> => 
         fromEvent(socket, 'connection').pipe( 
-        mergeMap((connection: EngineSocket) =>
+        mergeMap((connection: any) =>
             merge(connection$(connection), ticker$))) // <-- merge with tick stream emitter
 
 
