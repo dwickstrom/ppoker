@@ -1,7 +1,7 @@
 import { Games, leaveAllGames, Game, GameStateLabel, isAbandoned, Vote, addVote, canVote, GameState, _Game } from "../src/game"
 import { PlayerPool } from "../src/player"
-import { Event, playerVoted, playerJoinedGame, clientDisconnected } from "../src/event"
-import { now } from "../src/utils"
+import { Event, playerVoted, playerJoinedGame, clientDisconnected, addPlayer } from "../src/event"
+import { now, toList, removeKey } from "../src/utils"
 import { AppState } from "../src/app"
 import { currentGameState } from "../src/websocket";
 const socket = require('socket.io')
@@ -258,17 +258,49 @@ describe('Game utils', () => {
 
         expect(actual).not.toBeTruthy()
     })    
+
+    test('addPlayer', () => {
+        let game = Game('a game', {})
+
+        let actual = addPlayer('player-id', 'jane-doe')(game)
+
+        expect(toList(actual.players).length).toBe(1)
+    })
 })
 
 describe('Other utils', () => {
     test('get current game state from buffer', () => {
-        
-        let game:_Game = Game('a game', {})        
+        let game:_Game = Game('a game', {})                
         let stateBuffer: AppState[] = [{
             games: {[game.id]: game},
             connections: {},
         }]
+        
         let actual = currentGameState(stateBuffer)
+        
         expect(actual[0].label).toBe('initialized')
+    })
+})
+
+describe('removeKey', () => {
+
+    test('removeKey with existing key', () => {
+        let some = {
+            'abc-123': 'foo'
+        }
+
+        let actual = removeKey('abc-123')(some)
+
+        expect(actual).toEqual({})
+    })
+
+    test('removeKey with non-existing key', () => {
+        let some = {
+            'abc-123': 'foo'
+        }
+
+        let actual = removeKey('__none__')(some)
+
+        expect(actual).toEqual(some)
     })
 })

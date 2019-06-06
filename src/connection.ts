@@ -1,8 +1,12 @@
 import { UUID } from "./utils";
 
-export interface Connection {
+export interface _Connection {
     connectionId: string,
     userId: UUID,
 }
 
-export type Connections = Record<string, Connection>
+export const Connection = 
+    (connectionId: string, userId: UUID): Readonly<_Connection> =>
+        ({connectionId, userId})
+
+export type Connections = Record<string, _Connection>

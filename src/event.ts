@@ -1,8 +1,9 @@
 import { AppState } from './app'
-import { lastFrom, now, Index } from './utils';
+import { lastFrom, now, Index, removeKey } from './utils';
 import { PlayerId } from './player';
 import { _Game, leaveAllGames, removeStale, _Vote, addVote } from './game';
 import { Socket } from 'socket.io';
+import { Connection } from './connection';
 
 export type EventLabel =
   | 'ClientConnected'
@@ -30,16 +31,7 @@ export const appendTo =
     (next: AppState): AppState[] =>
       buffer.concat(next).slice(buffer.length-BUFFER_SIZE)
 
-export const removeById =
-  (id: Index) =>
-    (obj: Record<Index, any>) =>
-      Object.keys(obj)
-        .reduce((acc: Record<Index, any>, x: any) =>
-          x === id 
-          ? acc 
-          : ({...acc, [x]: obj[x]}), {})
-
-const addPlayer =
+export const addPlayer =
   (playerId: PlayerId, name: string) =>
     (game: _Game): _Game =>
       ({
@@ -66,7 +58,7 @@ export const clientDisconnected: AppStateReducer =
       lastFrom(buffer)
         .map((latest: AppState) => ({
           ...latest,
-          connections: removeById(event.payload.connection.id)(latest.connections),
+          connections: removeKey(event.payload.connection.id)(latest.connections),
           games: leaveAllGames(event.payload.connection.id)(latest.games),
         }))
         .flatMap(appendTo(buffer))
@@ -102,7 +94,7 @@ export const timeElapsed: AppStateReducer =
         .flatMap(appendTo(buffer))
 
 export const playerVoted: AppStateReducer =
-  (event: _Event, socket: Socket) =>
+  (event: _Event, _: Socket) =>
     (buffer: AppState[]) =>
       lastFrom(buffer)
         .map((latest: AppState) =>      
@@ -118,14 +110,14 @@ export const playerVoted: AppStateReducer =
         .flatMap(appendTo(buffer))
 
 export const clientConnected: AppStateReducer =
-  (event: _Event, socket: Socket) =>
+  (event: _Event, _: Socket) =>
     (buffer: AppState[]) =>
       lastFrom(buffer)
         .map((latest: AppState) => ({
           ...latest,
           connections: {
             ...latest.connections,
-            [event.payload.connection.id]: event.payload.connection.id}}))
+            [event.payload.connection.id]: Connection(event.payload.connection.id, 'user-id')}}))
         .flatMap(appendTo(buffer))
 
 export const theUnknown: AppStateReducer =

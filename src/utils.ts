@@ -36,6 +36,15 @@ export const snd =
 export const raise = 
   (err: any): never => { throw err }
 
+export const removeKey =
+  (id: Index) =>
+    (obj: Record<Index, any>): Record<Index, any> =>
+      Object.keys(obj)
+        .reduce((acc: Record<Index, any>, x: any) =>
+          x === id 
+          ? acc 
+          : ({...acc, [x]: obj[x]}), {})
+
 export const avg = 
   (ns: number[]): number =>
     ns.reduce((x, y) => x + y, 0) / ns.length
