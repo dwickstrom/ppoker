@@ -15,12 +15,12 @@ export type EventLabel =
 
 
 export type _Event = {
-  label: EventLabel,
-  payload: any,
+  readonly label: EventLabel,
+  readonly payload: any,
 }
 
 export const Event =
-  (label: EventLabel, payload: any): _Event =>
+  (label: EventLabel, payload: any): Readonly<_Event> =>
     ({label, payload})
 
 const BUFFER_SIZE = 0;

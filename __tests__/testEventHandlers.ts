@@ -248,9 +248,13 @@ describe('Game utils', () => {
 
     test('user cannot vote when game is over', () => {
         let game = Game('foo', {'pid': {joinedAt: new Date(), leftAt: new Date(), name: 'foo-name', playerId: 'pid'}})
-        game.state = game.state.concat(GameState('expired'))
 
-        let actual = canVote('pid')(game)
+        let nextGame = {
+            ...game,
+            state: game.state.concat(GameState('expired'))
+        }
+
+        let actual = canVote('pid')(nextGame)
 
         expect(actual).not.toBeTruthy()
     })    

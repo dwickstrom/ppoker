@@ -7,14 +7,14 @@ import { AppState } from "./app";
 export type Value = 0 | 0.5 | 1 | 2| 3 | 5 | 8 | 13 | 20 | 40 | 100
 
 export interface _Vote {
-  value: Value,
-  castOn: Date,
-  playerId: PlayerId,
-  gameId: UUID
+  readonly value: Value,
+  readonly castOn: Date,
+  readonly playerId: PlayerId,
+  readonly gameId: UUID
 }
 
 export const Vote = 
-  (playerId: PlayerId, value: Value, gameId: UUID): _Vote => 
+  (playerId: PlayerId, value: Value, gameId: UUID): Readonly<_Vote> => 
     ({
       castOn: now(),
       playerId,
@@ -31,26 +31,26 @@ export type GameStateLabel =
   | "abandoned"
 
 export interface _GameState {
-  label: GameStateLabel,
-  observedAt: Date,
+  readonly label: GameStateLabel,
+  readonly observedAt: Date,
 }
 
 export const GameState =
-  (label: GameStateLabel): _GameState =>
+  (label: GameStateLabel): Readonly<_GameState> =>
     ({label, observedAt: now()})
 
 export interface _Game {
-  id: UUID,
-  description: string,
-  players: PlayerPool,
-  votes: _Vote[],
-  state: _GameState[],
+  readonly id: UUID,
+  readonly description: string,
+  readonly players: PlayerPool,
+  readonly votes: _Vote[],
+  readonly state: _GameState[],
 }
 
 export type Games = Record<UUID, _Game>
 
 export const Game =
-  (description: string, players: PlayerPool): _Game =>
+  (description: string, players: PlayerPool): Readonly<_Game> =>
     ({
       id: uuid(),
       description,

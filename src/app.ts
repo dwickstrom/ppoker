@@ -4,15 +4,15 @@ import { Socket } from 'socket.io';
 import { Connections } from './connection';
 
 export interface AppState {
-    games: Games,
-    connections: Connections,
+    readonly games: Games,
+    readonly connections: Connections,
 }
 
 export interface App {
     state: AppState[],
-    handleEvent: ((socket: Socket) => (event: handle._Event) => AppState[]),
-    setState: ((state: AppState[]) => void),
-    getState: (() => AppState[]),
+    readonly handleEvent: ((socket: Socket) => (event: handle._Event) => AppState[]),
+    readonly setState: ((state: AppState[]) => void),
+    readonly getState: (() => AppState[]),
 }
 
 const eventHandler =
